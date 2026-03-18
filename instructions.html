@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PAUSE Study - PacsBin Reference Lines Fix</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 700px; margin: 40px auto; padding: 0 20px; line-height: 1.6; color: #333; }
+  h1 { color: #1a1a2e; }
+  .bookmarklet-link { display: inline-block; padding: 12px 24px; background: #2563eb; color: white; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: 600; margin: 16px 0; cursor: grab; }
+  .bookmarklet-link:hover { background: #1d4ed8; }
+  .step { background: #f8fafc; border-left: 4px solid #2563eb; padding: 12px 16px; margin: 12px 0; border-radius: 0 8px 8px 0; }
+  .step-num { font-weight: 700; color: #2563eb; }
+  code { background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 14px; }
+  .note { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px 16px; margin: 16px 0; border-radius: 0 8px 8px 0; }
+</style>
+</head>
+<body>
+<h1>PAUSE Study - Enable Reference Lines on PacsBin</h1>
+<p>PacsBin's viewer has a bug that prevents cross-reference lines from working between series. This bookmarklet fixes it.</p>
+
+<h2>One-Time Setup (30 seconds)</h2>
+
+<div class="step">
+  <span class="step-num">Step 1:</span> Make sure your browser's <strong>bookmarks bar is visible</strong>.<br>
+  Chrome: <code>Ctrl+Shift+B</code> (Windows) or <code>Cmd+Shift+B</code> (Mac)
+</div>
+
+<div class="step">
+  <span class="step-num">Step 2:</span> <strong>Drag</strong> the blue button below to your bookmarks bar:<br><br>
+  <a class="bookmarklet-link" href="javascript:void(function(){if(typeof cornerstone==='undefined'||typeof cornerstoneTools==='undefined'||typeof cornerstoneMath==='undefined'){alert('Open a PacsBin case first, then click this bookmarklet.');return}var S='PACSBIN_SHARED_FOR';cornerstone.metaData.addProvider(function(t,id){if(t!=='imagePlaneModule')return;var c=cornerstone.imageCache.imageCache[id];var img=c?c.image:null;if(!img||!img.data)return;var d=img.data;var iopStr=d.string('x00200037');var ippStr=d.string('x00200032');if(!iopStr||!ippStr)return;var psStr=d.string('x00280030');var iop=iopStr.split('\\').map(Number);var ipp=ippStr.split('\\').map(Number);var ps=psStr?psStr.split('\\').map(Number):[1,1];return{frameOfReferenceUID:S,rows:d.uint16('x00280010'),columns:d.uint16('x00280011'),imageOrientationPatient:iop,rowCosines:new cornerstoneMath.Vector3(iop[0],iop[1],iop[2]),columnCosines:new cornerstoneMath.Vector3(iop[3],iop[4],iop[5]),imagePositionPatient:new cornerstoneMath.Vector3(ipp[0],ipp[1],ipp[2]),columnPixelSpacing:ps[0],rowPixelSpacing:ps[1],sliceThickness:parseFloat(d.string('x00180050')||'1')}},10000);jQuery('.viewport').off('CornerstoneImageRendered.reflines');jQuery('.viewport').on('CornerstoneImageRendered.reflines',function(){var el=cornerstone.getEnabledElement(this);if(!el||!el.image)return;var tp=cornerstone.metaData.get('imagePlaneModule',el.image.imageId);if(!tp)return;var ctx=el.canvas.getContext('2d');var vps=document.querySelectorAll('.viewport');for(var i=0;i<vps.length;i++){if(vps[i]===this)continue;try{var o=cornerstone.getEnabledElement(vps[i]);if(!o||!o.image)continue;var op=cornerstone.metaData.get('imagePlaneModule',o.image.imageId);if(!op)continue;var line=cornerstoneTools.referenceLines.calculateReferenceLine(tp,op);if(!line)continue;var s=cornerstone.pixelToCanvas(this,line.start);var e=cornerstone.pixelToCanvas(this,line.end);ctx.save();ctx.beginPath();ctx.strokeStyle='%2300FF00';ctx.lineWidth=2;ctx.setLineDash([6,4]);ctx.moveTo(s.x,s.y);ctx.lineTo(e.x,e.y);ctx.stroke();ctx.restore()}catch(ex){}}});document.querySelectorAll('.viewport').forEach(function(vp){try{cornerstone.updateImage(vp)}catch(ex){}});alert('Reference lines enabled! Set layout to 1x2 or 2x1 to cross-reference series.')}())">&#128279; PacsBin Ref Lines</a>
+  <br><small>(Drag this to your bookmarks bar - do not click it here)</small>
+</div>
+
+<p>That's it for setup. The bookmarklet stays in your bookmarks bar permanently.</p>
+
+<h2>How to Use (Every Case)</h2>
+
+<div class="step"><span class="step-num">1.</span> Open a PacsBin case link as normal.</div>
+<div class="step"><span class="step-num">2.</span> Click the <strong>grid icon</strong> in the toolbar and select a <strong>multi-panel layout</strong> (e.g. 1x2 for side-by-side). Make sure each panel shows a <strong>different series</strong>.</div>
+<div class="step"><span class="step-num">3.</span> Click <strong>"PacsBin Ref Lines"</strong> in your bookmarks bar.</div>
+<div class="step"><span class="step-num">4.</span> You will see a confirmation alert. <strong>Green dashed reference lines</strong> will appear on both viewports, updating as you scroll.</div>
+
+<div class="note">
+  <strong>Note:</strong> Click the bookmarklet once per case (it resets on page navigation). If you change the layout after activating, click it again.
+</div>
+
+<h2>Troubleshooting</h2>
+<ul>
+  <li><strong>"Open a PacsBin case first"</strong> - Navigate to a PacsBin case before clicking the bookmarklet.</li>
+  <li><strong>No lines visible</strong> - You need a multi-panel layout with different series in each panel.</li>
+  <li><strong>Lines appear but don't move</strong> - Click the bookmarklet again to re-attach handlers.</li>
+</ul>
+</body>
+</html>
