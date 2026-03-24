@@ -13,6 +13,9 @@
   .step-num { font-weight: 700; color: #2563eb; }
   code { background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 14px; }
   .note { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px 16px; margin: 16px 0; border-radius: 0 8px 8px 0; }
+  .copy-btn { display: inline-block; padding: 8px 16px; background: #64748b; color: white; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; margin-left: 8px; vertical-align: middle; }
+  .copy-btn:hover { background: #475569; }
+  .copy-btn.copied { background: #16a34a; }
 </style>
 </head>
 <body>
@@ -26,8 +29,19 @@
 <div class="step">
   <span class="step-num">Step 2:</span> <strong>Drag</strong> the blue button below to your bookmarks bar:<br><br>
   <a class="bookmarklet-link" href="javascript:void(function(){if(typeof cornerstone==='undefined'||typeof cornerstoneTools==='undefined'||typeof cornerstoneMath==='undefined'){alert('Open a PacsBin case first, then click this bookmarklet.');return}var S='PACSBIN_SHARED_FOR';var COLORS=['%2300FF00','%23FF6600','%2300CCFF','%23FF00FF','%23FFFF00'];var syncing=false;function getSliceNormal(p){var rc=p.rowCosines;var cc=p.columnCosines;return{x:rc.y*cc.z-rc.z*cc.y,y:rc.z*cc.x-rc.x*cc.z,z:rc.x*cc.y-rc.y*cc.x}}function slicePos(p){var n=getSliceNormal(p);var len=Math.sqrt(n.x*n.x+n.y*n.y+n.z*n.z);if(len>0){n.x/=len;n.y/=len;n.z/=len}return n.x*p.imagePositionPatient.x+n.y*p.imagePositionPatient.y+n.z*p.imagePositionPatient.z}function isParallel(p1,p2){var rc1=p1.rowCosines;var cc1=p1.columnCosines;var rc2=p2.rowCosines;var cc2=p2.columnCosines;var d1=Math.abs(rc1.x*rc2.x+rc1.y*rc2.y+rc1.z*rc2.z);var d2=Math.abs(cc1.x*cc2.x+cc1.y*cc2.y+cc1.z*cc2.z);return d1>0.95%26%26d2>0.95}cornerstone.metaData.addProvider(function(t,id){if(t!=='imagePlaneModule')return;var c=cornerstone.imageCache.imageCache[id];var img=c?c.image:null;if(!img||!img.data)return;var d=img.data;var iopStr=d.string('x00200037');var ippStr=d.string('x00200032');if(!iopStr||!ippStr)return;var psStr=d.string('x00280030');var iop=iopStr.split('\\').map(Number);var ipp=ippStr.split('\\').map(Number);var ps=psStr?psStr.split('\\').map(Number):[1,1];return{frameOfReferenceUID:S,rows:d.uint16('x00280010'),columns:d.uint16('x00280011'),imageOrientationPatient:iop,rowCosines:new cornerstoneMath.Vector3(iop[0],iop[1],iop[2]),columnCosines:new cornerstoneMath.Vector3(iop[3],iop[4],iop[5]),imagePositionPatient:new cornerstoneMath.Vector3(ipp[0],ipp[1],ipp[2]),columnPixelSpacing:ps[0],rowPixelSpacing:ps[1],sliceThickness:parseFloat(d.string('x00180050')||'1')}},10000);jQuery('.viewport').off('CornerstoneImageRendered.reflines');jQuery('.viewport').on('CornerstoneImageRendered.reflines',function(){var el=cornerstone.getEnabledElement(this);if(!el||!el.image)return;var tp=cornerstone.metaData.get('imagePlaneModule',el.image.imageId);if(!tp)return;var ctx=el.canvas.getContext('2d');var vps=document.querySelectorAll('.viewport');for(var i=0;i<vps.length;i++){if(vps[i]===this)continue;try{var o=cornerstone.getEnabledElement(vps[i]);if(!o||!o.image)continue;var op=cornerstone.metaData.get('imagePlaneModule',o.image.imageId);if(!op)continue;var color=COLORS[i%25COLORS.length];var line=cornerstoneTools.referenceLines.calculateReferenceLine(tp,op);if(line){var s=cornerstone.pixelToCanvas(this,line.start);var e=cornerstone.pixelToCanvas(this,line.end);ctx.save();ctx.beginPath();ctx.strokeStyle=color;ctx.lineWidth=2;ctx.setLineDash([6,4]);ctx.moveTo(s.x,s.y);ctx.lineTo(e.x,e.y);ctx.stroke();ctx.restore()}}catch(ex){}}});jQuery('.viewport').off('CornerstoneNewImage.sync');jQuery('.viewport').on('CornerstoneNewImage.sync',function(){if(syncing)return;var el=cornerstone.getEnabledElement(this);if(!el||!el.image)return;var tp=cornerstone.metaData.get('imagePlaneModule',el.image.imageId);if(!tp)return;var myPos=slicePos(tp);var vps=document.querySelectorAll('.viewport');syncing=true;for(var i=0;i<vps.length;i++){if(vps[i]===this)continue;try{var o=cornerstone.getEnabledElement(vps[i]);if(!o||!o.image)continue;var op=cornerstone.metaData.get('imagePlaneModule',o.image.imageId);if(!op||!isParallel(tp,op))continue;var ts=cornerstoneTools.getToolState(vps[i],'stack');if(!ts||!ts.data||!ts.data[0])continue;var stack=ts.data[0];var ids=stack.imageIds;var bestIdx=stack.currentImageIdIndex;var bestDist=Infinity;for(var j=0;j<ids.length;j++){var sp=cornerstone.metaData.get('imagePlaneModule',ids[j]);if(!sp)continue;var dd=Math.abs(slicePos(sp)-myPos);if(dd<bestDist){bestDist=dd;bestIdx=j}}if(bestIdx!==stack.currentImageIdIndex){cornerstoneTools.scrollToIndex(vps[i],bestIdx)}}catch(ex){}}syncing=false});document.querySelectorAll('.viewport').forEach(function(vp){try{cornerstone.updateImage(vp)}catch(ex){}});alert('Reference lines + sync scroll enabled! Cross-plane: ref lines. Same-plane (e.g. 3 axials): scroll sync.')}())">&#128279; PacsBin Ref Lines</a>
-  <br><small>(Drag this to your bookmarks bar - do not click it here)</small>
+  <button class="copy-btn" onclick="copyBookmarklet(this)">Copy to clipboard</button>
+  <br><small>Drag the blue button to your bookmarks bar, or copy and paste as a new bookmark URL.</small>
 </div>
+<script>
+function copyBookmarklet(btn){
+  fetch('bookmarklet.js').then(r=>r.text()).then(function(code){
+    navigator.clipboard.writeText(code.trim()).then(function(){
+      btn.textContent='Copied!';btn.classList.add('copied');
+      setTimeout(function(){btn.textContent='Copy to clipboard';btn.classList.remove('copied')},2000);
+    });
+  });
+}
+</script>
 
 <p>That's it for setup. The bookmarklet stays in your bookmarks bar permanently.</p>
 
